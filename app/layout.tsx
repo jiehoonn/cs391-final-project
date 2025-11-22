@@ -12,10 +12,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-        <body className={`${playfair.className} antialiased min-h-screen bg-pink-50`}>
-        <Header/>
-        {children}
-        </body>
+            <body className={`${playfair.className} antialiased min-h-screen bg-pink-50`}>
+                <Header/>
+                {children}
+            </body>
         </html>
     );
 }
