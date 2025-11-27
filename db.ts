@@ -1,3 +1,5 @@
+// MongoDB Cluster Connection + Collection Declaration => Jiehoon Lee
+
 import { MongoClient, Db, Collection } from 'mongodb';
 
 const MONGO_URI = process.env.MONGO_URI as string;
@@ -6,7 +8,11 @@ if (!MONGO_URI) {
 }
 
 const DB_NAME = "cs391-final-project";
-export const TASKS_LISTS_COLLECTION = "tasks-lists-collection";
+
+// Collection Names
+export const USERS_COLLECTION = "users";
+export const TASKS_COLLECTION = "tasks";
+export const TASK_LISTS_COLLECTION = "task-lists";
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
