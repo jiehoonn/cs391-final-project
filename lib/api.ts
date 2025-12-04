@@ -1,6 +1,5 @@
 // lib/api.ts
-// Author: YOU
-// Purpose: API integration helpers for tasks + task lists
+//Lina
 
 export async function apiGet<T>(url: string): Promise<T> {
     const res = await fetch(url, { method: "GET" });
