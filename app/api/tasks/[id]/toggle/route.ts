@@ -15,7 +15,7 @@ import { toggleTaskCompletion, findUserByEmail } from "@/lib/db";
 // Returns: Updated task with toggled completion status
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is authenticated
@@ -30,14 +30,17 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Await params
+    const { id } = await params;
+
     // Validate ObjectId format
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
     // Toggle the task completion
     const updatedTask = await toggleTaskCompletion(
-      new ObjectId(params.id),
+      new ObjectId(id),
       user._id
     );
 

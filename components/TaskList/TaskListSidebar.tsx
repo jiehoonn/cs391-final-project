@@ -3,27 +3,29 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
+import { List, Plus } from "lucide-react";
 import {TaskList} from "@/types/database";
 import TaskListItem from "./TaskListItem";
 import CreateTaskListModal from "./CreateTaskListModal";
 
-/* Helper function to fetch task lists from API
-Enable once backend is ready
 async function fetchTaskLists(): Promise<TaskList[]> {
     const res = await fetch("/api/task-lists");
     if (!res.ok) throw new Error ("Failed to fetch task lists");
-    return res.json();
+    const data = await res.json();
+    return data.taskLists;
 }
- */
 
-export default function TaskListSidebar() {
+interface TaskListSidebarProps {
+    selectedTaskListId: string | null;
+    onSelectTaskList: (id: string | null) => void;
+}
+
+export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }: TaskListSidebarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [taskLists, setTaskLists] = useState<TaskList[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    /* Fetch lists from backend
-    Enable once backend is ready
     useEffect(() => {
         const loadLists = async () => {
             try {
@@ -38,18 +40,52 @@ export default function TaskListSidebar() {
         };
         loadLists();
     }, [])
-    */
+
+    const handleDeleteList = async (id: string) => {
+        try {
+            const res = await fetch(`/api/task-lists/${id}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to delete task list");
+            }
+
+            // Remove from local state
+            setTaskLists((prev) => prev.filter((list) => list._id?.toString() !== id));
+
+            // If the deleted list was selected, switch to "All Tasks"
+            if (selectedTaskListId === id) {
+                onSelectTaskList(null);
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Failed to delete task list");
+        }
+    };
 
     return (
         <div className="w-64 bg-gray-800 text-white flex flex-col p-4">
             <h1 className="text-2xl font-bold mb-6">Task Lists</h1>
 
+            {/* View All Tasks button */}
+            <button
+                onClick={() => onSelectTaskList(null)}
+                className={`p-2 rounded hover:bg-gray-700 w-full text-left mb-2 flex items-center gap-2 ${
+                    selectedTaskListId === null ? "bg-gray-700" : ""
+                }`}
+            >
+                <List size={18} />
+                <span>All Tasks</span>
+            </button>
+
             {/* Button to open modal to create new task list */}
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="mt-4 bg-blue-500 hover:bg-blue-600 p-2 rounded"
+                className="mt-4 bg-blue-500 hover:bg-blue-600 p-2 rounded flex items-center justify-center gap-2"
             >
-                + New List
+                <Plus size={18} />
+                <span>New List</span>
             </button>
 
             {/* Displays any error messages */}
@@ -59,9 +95,12 @@ export default function TaskListSidebar() {
             <div className="mt-4 flex flex-col space-y-2">
                 {Array.isArray(taskLists) &&
                 taskLists.map((list, index) =>
-                    <TaskListItem 
-                        key={list._id ? list._id.toString() : `temp-${index}`} 
-                        list={list} 
+                    <TaskListItem
+                        key={list._id ? list._id.toString() : `temp-${index}`}
+                        list={list}
+                        isSelected={list._id?.toString() === selectedTaskListId}
+                        onSelect={() => onSelectTaskList(list._id?.toString() || null)}
+                        onDelete={handleDeleteList}
                     />
                 )}
             </div>
@@ -72,7 +111,12 @@ export default function TaskListSidebar() {
                     onClose={() => setIsModalOpen(false)} // close modal
                     onCreate={(newList) => {
                         // add new list to state
-                        setTaskLists((prev) => [...prev, newList]);
+                        console.log("TaskListSidebar - adding new list to state:", newList);
+                        setTaskLists((prev) => {
+                            const updated = [...prev, newList];
+                            console.log("TaskListSidebar - updated lists:", updated);
+                            return updated;
+                        });
                         setIsModalOpen(false); // close modal after creating
                     }}
                 />

@@ -1,14 +1,45 @@
-import { auth } from "@/auth";
-import TaskDashboardSection from "@/components/Task/TaskDashboardSection";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import TaskGrid from "@/components/Task/TaskGrid";
+import { useDashboard } from "./DashboardContext";
 
-export default async function DashboardPage() {
-  const session = await auth();
+export default function DashboardPage() {
+  const { selectedTaskListId } = useDashboard();
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // If not logged in, redirect to home
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/session");
+        const data = await res.json();
+
+        if (!data || !data.user) {
+          router.push("/");
+          return;
+        }
+
+        setSession(data);
+      } catch (error) {
+        console.error("Failed to check auth:", error);
+        router.push("/");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, [router]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   if (!session?.user) {
-    redirect("/");
+    return null;
   }
 
   return (
@@ -23,8 +54,13 @@ export default async function DashboardPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Your Assignments</h2>
-            <TaskGrid taskListId={null} />
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedTaskListId ? "Task List" : "All Tasks"}
+        </h2>
+        <TaskGrid
+          key={selectedTaskListId || "all-tasks"}
+          taskListId={selectedTaskListId || null}
+        />
       </div>
     </div>
   );

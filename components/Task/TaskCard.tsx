@@ -8,6 +8,7 @@
 
 import { format } from "date-fns";
 import styled, { css } from "styled-components";
+import { Check, Pencil, Trash2 } from "lucide-react";
 import type { Task } from "@/types/database";
 import { Priority } from "@/types/database";
 
@@ -168,13 +169,17 @@ const StatusPill = styled.span`
 const LinkButton = styled.button`
   background: none;
   border: none;
-  padding: 0;
+  padding: 0.2rem;
   font-size: 0.75rem;
   color: #2563eb;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 0.25rem;
 
   &:hover {
-    text-decoration: underline;
+    background-color: rgba(37, 99, 235, 0.1);
   }
 `;
 
@@ -202,7 +207,7 @@ export default function TaskCard({
         $checked={task.completed}
         onClick={() => onToggleComplete?.(id)}
       >
-        {task.completed && <span>✓</span>}
+        {task.completed && <Check size={14} strokeWidth={3} />}
       </CheckboxButton>
 
       <Content>
@@ -231,12 +236,14 @@ export default function TaskCard({
           <FooterRight>
             {onEdit && (
               <LinkButton type="button" onClick={() => onEdit(task)}>
-                Edit
+                <Pencil size={14} />
+                <span>Edit</span>
               </LinkButton>
             )}
             {onDelete && (
-              <LinkButton type="button" onClick={() => onDelete(id)}>
-                Delete
+              <LinkButton type="button" onClick={() => onDelete(id)} style={{ color: "#dc2626" }}>
+                <Trash2 size={14} />
+                <span>Delete</span>
               </LinkButton>
             )}
           </FooterRight>

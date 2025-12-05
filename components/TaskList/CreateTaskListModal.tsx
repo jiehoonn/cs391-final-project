@@ -33,7 +33,9 @@ export default function CreateTaskListModal ({
             });
 
             if (!res.ok) throw new Error("Failed to create task list");
-            const newList: TaskList = await res.json();
+            const data = await res.json();
+            const newList: TaskList = data.taskList; // Extract taskList from response
+            console.log("Created task list:", newList);
             onCreate(newList); // Adds new list to sidebar
         } catch (err: any) {
             console.error(err);

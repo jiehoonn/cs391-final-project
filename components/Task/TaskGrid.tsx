@@ -10,6 +10,7 @@
 
 import { useState } from "react";
 import styled from "styled-components";
+import { Plus } from "lucide-react";
 import TaskCard from "./TaskCard";
 import TaskFilters, { TaskFilter } from "./TaskFilters";
 import CreateTaskModal, { CreateTaskFormValues } from "./CreateTaskModal";
@@ -51,6 +52,9 @@ const NewTaskButton = styled.button`
   color: #ffffff;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 
   &:hover {
     background-color: #16a34a;
@@ -93,10 +97,15 @@ type TaskGridProps = {
 export default function TaskGrid({ taskListId }: TaskGridProps) {
   const [filter, setFilter] = useState<TaskFilter>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [defaultListId, setDefaultListId] = useState<string | null>(null);
 
-  // If parent gives us a listId, use it; otherwise use our default; otherwise undefined = "all tasks"
-  const effectiveTaskListId = taskListId ?? defaultListId ?? undefined;
+  // Use the taskListId directly - undefined means "all tasks"
+  const effectiveTaskListId = taskListId || undefined;
+
+  // Debug logging
+  console.log("TaskGrid render:", {
+    taskListIdProp: taskListId,
+    effectiveTaskListId,
+  });
 
   const {
     tasks,
@@ -122,30 +131,27 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
   });
 
   const handleCreateTask = async (values: CreateTaskFormValues) => {
-      let listId = effectiveTaskListId ?? defaultListId;
+      // Use the currently selected task list ID
+      // If no list is selected (viewing "All Tasks"), create a default list first
+      let listId = effectiveTaskListId;
 
       if (!listId) {
+        // No task list selected - create a default one
         const response = await apiPost<{ taskList: TaskList }>("/api/task-lists", {
           name: "My Assignments",
         });
-        
+
         console.log("🔍 API returned:", response);
-        
-        // The API returns { taskList: {...} }, not the taskList directly
+
         const created = response.taskList;
-        
+
         if (!created || !created._id) {
           console.error("POST /api/task-lists did not return _id:", response);
           throw new Error("Failed to create default task list");
         }
 
         listId = created._id.toString();
-        setDefaultListId(listId);
-      }
-
-      // Guard: if somehow we still don't have an id, don't call /api/tasks
-      if (!listId) {
-        throw new Error("No valid taskListId available, cannot create task");
+        console.log("Created default task list with ID:", listId);
       }
 
       console.log("Creating task with taskListId =", listId);
@@ -160,12 +166,17 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
         payload.description = values.description;
       }
       if (values.dueDate) {
-        payload.dueDate = new Date(values.dueDate).toISOString();
+        // Create date at local midnight, not UTC midnight
+        // values.dueDate is "YYYY-MM-DD" format from input[type="date"]
+        const [year, month, day] = values.dueDate.split('-').map(Number);
+        const localDate = new Date(year, month - 1, day); // month is 0-indexed
+        payload.dueDate = localDate.toISOString();
       }
       if (values.priority) {
         payload.priority = values.priority;
       }
 
+      console.log("Creating task with payload:", payload);
       await addTask(payload);
   };
   // ---------- rendering ----------
@@ -192,7 +203,8 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
             {filteredTasks.length} task{filteredTasks.length !== 1 && "s"}
           </CountText>
           <NewTaskButton type="button" onClick={() => setIsCreateOpen(true)}>
-            + New Task
+            <Plus size={16} />
+            <span>New Task</span>
           </NewTaskButton>
         </RightSide>
       </TopBar>

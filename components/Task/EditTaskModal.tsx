@@ -200,13 +200,22 @@ export default function EditTaskModal({
   // Whenever we open the modal for a specific task, seed the form with its current values
   useEffect(() => {
     if (task && isOpen) {
+      // Format dueDate for input[type="date"] which expects "YYYY-MM-DD"
+      let formattedDueDate = "";
+      if (task.dueDate) {
+        const date = new Date(task.dueDate);
+        // Get local date components to avoid timezone issues
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        formattedDueDate = `${year}-${month}-${day}`;
+      }
+
       setForm({
         title: task.title,
         description: task.description ?? "",
         priority: task.priority,
-        dueDate: task.dueDate
-          ? new Date(task.dueDate).toISOString().slice(0, 10)
-          : "",
+        dueDate: formattedDueDate,
       });
       setIsSubmitting(false);
       setError(null);
