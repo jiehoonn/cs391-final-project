@@ -58,8 +58,11 @@ export default function TaskListSidebar() {
             {/* Renders each task list as a clickable item */}
             <div className="mt-4 flex flex-col space-y-2">
                 {Array.isArray(taskLists) &&
-                taskLists.map((list) =>
-                    <TaskListItem key={list._id?.toString()} list={list} />
+                taskLists.map((list, index) =>
+                    <TaskListItem 
+                        key={list._id ? list._id.toString() : `temp-${index}`} 
+                        list={list} 
+                    />
                 )}
             </div>
 
