@@ -28,7 +28,6 @@ export async function apiPost<T>(url: string, body: any): Promise<T> {
     return res.json();
 }
 
-
 export async function apiPut<T>(url: string, body: any): Promise<T> {
     const res = await fetch(url, {
         method: "PUT",
