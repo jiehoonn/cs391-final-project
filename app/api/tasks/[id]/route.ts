@@ -20,7 +20,7 @@ import { Priority, UpdateTaskInput } from "@/types/database";
 // Returns: Task object if found and belongs to user
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is authenticated
@@ -35,13 +35,16 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Await params
+    const { id } = await params;
+
     // Validate ObjectId format
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
     // Fetch the task
-    const task = await getTaskById(new ObjectId(params.id));
+    const task = await getTaskById(new ObjectId(id));
 
     // Check if task exists
     if (!task) {
@@ -78,7 +81,7 @@ export async function GET(
 // Returns: Updated task
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is authenticated
@@ -93,8 +96,11 @@ export async function PUT(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Await params
+    const { id } = await params;
+
     // Validate ObjectId format
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
@@ -150,7 +156,7 @@ export async function PUT(
 
     // Update the task
     const updatedTask = await updateTask(
-      new ObjectId(params.id),
+      new ObjectId(id),
       user._id,
       updates
     );
@@ -178,7 +184,7 @@ export async function PUT(
 // Returns: Success message
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is authenticated
@@ -193,13 +199,16 @@ export async function DELETE(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Await params
+    const { id } = await params;
+
     // Validate ObjectId format
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid task ID" }, { status: 400 });
     }
 
     // Delete the task
-    const deleted = await deleteTask(new ObjectId(params.id), user._id);
+    const deleted = await deleteTask(new ObjectId(id), user._id);
 
     // Check if task was found and deleted
     if (!deleted) {

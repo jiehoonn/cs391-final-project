@@ -19,6 +19,9 @@ export async function apiPost<T>(url: string, body: any): Promise<T> {
     });
 
     if (!res.ok) {
+        // ⬇️ NEW: log the response body so we can see why it failed
+        const text = await res.text();
+        console.error(`POST ${url} failed ${res.status}:`, text);
         throw new Error(`POST ${url} failed: ${res.status}`);
     }
 

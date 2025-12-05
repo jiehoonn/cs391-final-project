@@ -1,5 +1,7 @@
 import { auth } from "@/auth";
+import TaskDashboardSection from "@/components/Task/TaskDashboardSection";
 import { redirect } from "next/navigation";
+import TaskGrid from "@/components/Task/TaskGrid";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -22,9 +24,7 @@ export default async function DashboardPage() {
 
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Your Assignments</h2>
-        <p className="text-gray-500">
-          No assignments yet. Start by creating a task list!
-        </p>
+            <TaskGrid taskListId={null} />
       </div>
     </div>
   );

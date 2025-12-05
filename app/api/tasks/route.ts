@@ -93,6 +93,10 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
+
+    console.log("🔍 API RECEIVED BODY:", JSON.stringify(body, null, 2));
+    console.log("🔍 Body keys:", Object.keys(body));
+
     const {
       taskListId,
       title,
