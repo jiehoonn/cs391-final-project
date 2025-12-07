@@ -25,19 +25,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <header className="bg-white shadow p-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Dashboard</h2>
           <div className="flex items-center space-x-2">
-            {/* Task filter dropdown menu */}
-            {/* <select className="p-2 border rounded">
-              <option value="all">All Tasks</option>
-              <option value="completed">Completed</option>
-              <option value="in-progress">In progress</option>
-            </select> */}
-            {/*Search bar*/}
-            {/* <input
-              type="text"
-              placeholder="Search tasks..."
-              className="p-2 border rounded"
-            /> */}
-            {/* Sign out button */}
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors"

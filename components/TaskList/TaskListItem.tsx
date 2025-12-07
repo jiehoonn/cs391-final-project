@@ -1,7 +1,7 @@
 // components/TaskList/TaskListItem.tsx: Individual list card => Jocelyn Mao
 
 import React, { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import {TaskList} from "@/types/database";
 
 interface TaskListItemProps {
@@ -9,10 +9,11 @@ interface TaskListItemProps {
     isSelected: boolean;
     onSelect: () => void;
     onDelete: (id: string) => void;
+    onEdit: () => void;
 }
 
 // Displays single task list in sidebar
-export default function TaskListItem({list, isSelected, onSelect, onDelete}: TaskListItemProps){
+export default function TaskListItem({list, isSelected, onSelect, onDelete, onEdit}: TaskListItemProps){
     const [showConfirm, setShowConfirm] = useState(false);
 
     const handleDelete = (e: React.MouseEvent) => {
@@ -63,6 +64,18 @@ export default function TaskListItem({list, isSelected, onSelect, onDelete}: Tas
             >
                 {list.name}
             </button>
+
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                }}
+                className="px-2 py-1 hover:bg-blue-600 rounded text-sm"
+                title="Edit task list"
+            >
+                <Pencil size={16} />
+            </button>
+
             <button
                 onClick={handleDelete}
                 className="px-2 py-1 hover:bg-red-600 rounded text-sm"

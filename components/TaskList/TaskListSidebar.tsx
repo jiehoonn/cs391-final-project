@@ -7,6 +7,7 @@ import { List, Plus } from "lucide-react";
 import {TaskList} from "@/types/database";
 import TaskListItem from "./TaskListItem";
 import CreateTaskListModal from "./CreateTaskListModal";
+import EditTaskListModal from "@/components/TaskList/EditTaskListModal";
 
 async function fetchTaskLists(): Promise<TaskList[]> {
     const res = await fetch("/api/task-lists");
@@ -25,6 +26,8 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
     const [taskLists, setTaskLists] = useState<TaskList[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [editingList, setEditingList] = useState<TaskList | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     useEffect(() => {
         const loadLists = async () => {
@@ -65,8 +68,8 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
     };
 
     return (
-        <div className="w-64 bg-gray-800 text-white flex flex-col p-4">
-            <h1 className="text-2xl font-bold mb-6">Task Lists</h1>
+        <div className="w-72 bg-gray-800 text-white flex flex-col p-4">
+            <h1 className="text-lg font-bold mb-4">Task Lists</h1>
 
             {/* View All Tasks button */}
             <button
@@ -101,6 +104,10 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
                         isSelected={list._id?.toString() === selectedTaskListId}
                         onSelect={() => onSelectTaskList(list._id?.toString() || null)}
                         onDelete={handleDeleteList}
+                        onEdit={() => {
+                            setEditingList(list);
+                            setIsEditModalOpen(true);
+                        }}
                     />
                 )}
             </div>
@@ -118,6 +125,20 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
                             return updated;
                         });
                         setIsModalOpen(false); // close modal after creating
+                    }}
+                />
+            )}
+
+            {isEditModalOpen && editingList &&(
+                <EditTaskListModal
+                    taskList={editingList}
+                    onClose={() => setIsEditModalOpen(false)} // close modal
+                    onEdit={(editedList) => {
+                        // add new list to state
+                        setTaskLists((prev) =>
+                            prev.map((l) => (l._id ===editedList._id ? editedList : l))
+                        );
+                        setIsEditModalOpen(false); // close modal after creating
                     }}
                 />
             )}
