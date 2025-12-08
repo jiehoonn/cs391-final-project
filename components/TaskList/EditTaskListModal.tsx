@@ -50,10 +50,10 @@ export default function EditTaskListModal ({
 
     return (
         <div
-            className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center"
         >
-            <div className="bg-gray-800 text-white p-6 rounded shadow w-96">
-                <h2 className="text-blue-xl font-bold mb-4 text-blue-400">Edit Task List</h2>
+            <div className="w-80 bg-stone-100 text-stone-500 text-sm font-semibold p-4 rounded">
+                <h2 className="mb-2 text-stone-900">Edit Task List</h2>
 
                 {/* Form for creating new task list */}
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -62,24 +62,24 @@ export default function EditTaskListModal ({
                         placeholder="List Name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 bg-stone-200 rounded mb-0"
                         required
                     />
 
                     {error && <p className="text-red-500">{error}</p>}
 
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end gap-2 mt-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 rounded border"
+                            className="flex-1 px-2 py-1 hover:text-red-700 bg-stone-200 rounded text-xs cursor-pointer"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
+                            className="flex-1 px-2 py-1 hover:text-blue-700 bg-stone-200 rounded text-xs cursor-pointer"
                         >
                             {loading ? "Saving..." : "Save Changes"}
                         </button>

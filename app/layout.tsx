@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-// import Header from "@/components/Header";
 import SessionProvider from "@/components/SessionProvider";
 import React from "react";
 
@@ -21,7 +20,6 @@ export default function RootLayout({
         <html lang="en">
             <body className={`${inter.className} antialiased min-h-screen`}>
                 <SessionProvider>
-                    {/* <Header/> */}
                     {children}
                 </SessionProvider>
             </body>

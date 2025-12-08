@@ -68,34 +68,38 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
     };
 
     return (
-        <div className="w-72 bg-gray-800 text-white flex flex-col p-4">
-            <h1 className="text-lg font-bold mb-4">Task Lists</h1>
+        <div className="w-60 bg-stone-100 shadow-inner text-stone-900 flex flex-col p-4">
+            <h1 className="text-sm font-bold mb-4">Assignment Tracker</h1>
 
             {/* View All Tasks button */}
             <button
                 onClick={() => onSelectTaskList(null)}
-                className={`p-2 rounded hover:bg-gray-700 w-full text-left mb-2 flex items-center gap-2 ${
-                    selectedTaskListId === null ? "bg-gray-700" : ""
+                className={`p-1 rounded hover:bg-stone-200 w-full text-left text-sm font-semibold mb-1 flex items-center gap-2 cursor-pointer ${
+                    selectedTaskListId === null 
+                        ? "bg-stone-200" // selected
+                        : "bg-stone-100 text-stone-500" // not selected
                 }`}
             >
-                <List size={18} />
+                <List size={14} />
                 <span>All Tasks</span>
             </button>
 
             {/* Button to open modal to create new task list */}
             <button
                 onClick={() => setIsModalOpen(true)}
-                className="mt-4 bg-blue-500 hover:bg-blue-600 p-2 rounded flex items-center justify-center gap-2"
+                className="p-1 rounded hover:bg-stone-200 w-full text-left text-sm text-stone-500 font-semibold mb-1 flex items-center gap-2 cursor-pointer"
             >
-                <Plus size={18} />
+                <Plus size={14} />
                 <span>New List</span>
             </button>
 
             {/* Displays any error messages */}
             {error && <p className="mt-4 text-red-500">{error}</p>}
 
+            <h2 className="text-xs font-bold mt-4 text-stone-400 mb-2">Task Lists</h2>
+
             {/* Renders each task list as a clickable item */}
-            <div className="mt-4 flex flex-col space-y-2">
+            <div className="flex flex-col w-full">
                 {Array.isArray(taskLists) &&
                 taskLists.map((list, index) =>
                     <TaskListItem
