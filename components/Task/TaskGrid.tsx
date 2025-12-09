@@ -235,6 +235,7 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onCreate={handleCreateTask}
+        taskListId={effectiveTaskListId}
       />
     </Wrapper>
   );

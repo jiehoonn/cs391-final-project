@@ -6,7 +6,7 @@ export function SignInButton() {
   return (
     <button
       onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-      className="w-full flex items-center justify-center gap-3 px-6 py-3 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200"
+      className="w-full flex items-center justify-center gap-3 px-6 py-3 border border-stone-300 rounded-md shadow-sm bg-white hover:bg-stone-50 transition-all duration-200 hover:shadow-md cursor-pointer"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24">
         <path
@@ -26,7 +26,7 @@ export function SignInButton() {
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
         />
       </svg>
-      <span className="text-gray-700 font-medium">Sign in with Google</span>
+      <span className="text-stone-700 font-semibold text-sm">Sign in with Google</span>
     </button>
   );
 }

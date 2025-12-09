@@ -193,8 +193,9 @@ export default function TaskCard({
 }: TaskCardProps) {
   // Normalize dueDate from server to a Date
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+  const now = new Date();
   const isOverdue =
-    !!dueDate && !task.completed && dueDate.getTime() < Date.now();
+    !!dueDate && !task.completed && dueDate.getTime() < now.getTime();
 
   // Convert ObjectId to string for keys & callbacks
   const id = task._id ? task._id.toString() : "";

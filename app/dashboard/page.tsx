@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TaskGrid from "@/components/Task/TaskGrid";
 import { useDashboard } from "./DashboardContext";
+import type { TaskList } from "@/types/database";
 
 export default function DashboardPage() {
   const { selectedTaskListId } = useDashboard();
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [taskLists, setTaskLists] = useState<TaskList[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -34,6 +36,22 @@ export default function DashboardPage() {
     checkAuth();
   }, [router]);
 
+  useEffect(() => {
+    async function fetchTaskLists() {
+      try {
+        const res = await fetch("/api/task-lists");
+        const data = await res.json();
+        setTaskLists(data.taskLists || []);
+      } catch (error) {
+        console.error("Failed to fetch task lists:", error);
+      }
+    }
+
+    if (session) {
+      fetchTaskLists();
+    }
+  }, [session]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -41,6 +59,14 @@ export default function DashboardPage() {
   if (!session?.user) {
     return null;
   }
+
+  // Find the selected task list name
+  const selectedTaskList = taskLists.find(
+    (list) => list._id?.toString() === selectedTaskListId
+  );
+  const taskListTitle = selectedTaskListId
+    ? selectedTaskList?.name || "Task List"
+    : "All Tasks";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -54,8 +80,8 @@ export default function DashboardPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">
-          {selectedTaskListId ? "Task List" : "All Tasks"}
+        <h2 className="text-xl font-semibold mb-4 text-black">
+          {taskListTitle}
         </h2>
         <TaskGrid
           key={selectedTaskListId || "all-tasks"}
