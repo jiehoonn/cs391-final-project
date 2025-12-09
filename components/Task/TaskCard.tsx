@@ -236,8 +236,9 @@ export default function TaskCard({
   onDelete,
 }: TaskCardProps) {
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
+  const now = new Date();
   const isOverdue =
-    !!dueDate && !task.completed && dueDate.getTime() < Date.now();
+    !!dueDate && !task.completed && dueDate.getTime() < now.getTime();
 
   const id = task._id ? task._id.toString() : "";
 

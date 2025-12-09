@@ -24,7 +24,6 @@ interface TaskListSidebarProps {
 export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }: TaskListSidebarProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [taskLists, setTaskLists] = useState<TaskList[]>([]);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [editingList, setEditingList] = useState<TaskList | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,8 +36,6 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
             } catch (err) {
                 console.error(err);
                 setError("Failed to fetch task lists");
-            } finally {
-                setLoading(false);
             }
         };
         loadLists();

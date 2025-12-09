@@ -18,6 +18,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import styled from "styled-components";
 import type { Task } from "@/types/database";
+import { Priority } from "@/types/database";
 
 /* =====================
    Modal Layout Styling
@@ -213,7 +214,7 @@ export default function EditTaskModal({
   const [form, setForm] = useState<EditTaskFormValues>({
     title: "",
     description: "",
-    priority: "medium",
+    priority: Priority.MEDIUM,
     dueDate: "",
   });
 
@@ -331,9 +332,10 @@ export default function EditTaskModal({
                   }))
                 }
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value={Priority.LOW}>Low</option>
+                <option value={Priority.MEDIUM}>Medium</option>
+                <option value={Priority.HIGH}>High</option>
+                <option value={Priority.URGENT}>Urgent</option>
               </Select>
             </Field>
 

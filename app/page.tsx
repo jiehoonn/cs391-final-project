@@ -11,22 +11,22 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-stone-100">
+      <div className="max-w-md w-full space-y-6 p-10 bg-white rounded-lg shadow-md border border-stone-200">
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl font-bold text-stone-900 tracking-tight">
             Assignment Tracker
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-stone-600 text-sm">
             Stay organized and manage your homework efficiently
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="pt-4">
           <SignInButton />
         </div>
 
-        <div className="text-center text-sm text-gray-500">
+        <div className="text-center text-xs text-stone-500 pt-2">
           <p>Sign in with your Google account to get started</p>
         </div>
       </div>

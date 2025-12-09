@@ -34,7 +34,7 @@ type CreateTaskModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onCreate: (values: CreateTaskFormValues) => Promise<void> | void;
-  taskListId: string;
+  taskListId?: string;
 };
 
 // --- style components ---
@@ -50,93 +50,97 @@ const Overlay = styled.div`
   z-index: 50;
 `;
 
-// model container
+// modal container
 const Modal = styled.div`
   width: 100%;
   max-width: 420px;
-  background-color: #020617;
-  color: #f9fafb;
+  background-color: #ffffff;
   border-radius: 0.75rem;
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 35px rgba(15, 23, 42, 0.35);
 `;
 
 // modal title heading
 const Title = styled.h3`
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
+  color: #111827;
 `;
 
-// form container with vertical layout 
+// form container with vertical layout
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
 `;
 
 // individual form field container
 const Field = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.15rem;
 `;
 
 // form field label
 const Label = styled.label`
   font-size: 0.8rem;
   font-weight: 500;
+  color: #374151;
 `;
 
 const Input = styled.input`
+  margin-top: 0.15rem;
   width: 100%;
   border-radius: 0.45rem;
-  border: 1px solid #4b5563;
-  background-color: #020617;
-  color: #f9fafb;
-  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #111827;
+  padding: 0.45rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
 
   &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 1px #3b82f633;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb33;
   }
 `;
 
 // text area for description
 const TextArea = styled.textarea`
+  margin-top: 0.15rem;
   width: 100%;
   border-radius: 0.45rem;
-  border: 1px solid #4b5563;
-  background-color: #020617;
-  color: #f9fafb;
-  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #111827;
+  padding: 0.45rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
   resize: vertical;
-  min-height: 80px;
+  min-height: 70px;
 
   &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 1px #3b82f633;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb33;
   }
 `;
 
 // dropdown for priority
 const Select = styled.select`
+  margin-top: 0.15rem;
   width: 100%;
   border-radius: 0.45rem;
-  border: 1px solid #4b5563;
-  background-color: #020617;
-  color: #f9fafb;
-  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #111827;
+  padding: 0.45rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
 
   &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 1px #3b82f633;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb33;
   }
 `;
 
@@ -155,11 +159,11 @@ const SecondaryButton = styled.button`
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
   background-color: transparent;
-  color: #e5e7eb;
+  color: #4b5563;
   cursor: pointer;
 
   &:hover {
-    background-color: #111827;
+    background-color: #f3f4f6;
   }
 `;
 
@@ -170,14 +174,23 @@ const PrimaryButton = styled.button<{ disabled?: boolean }>`
   padding: 0.4rem 0.85rem;
   font-size: 0.8rem;
   font-weight: 500;
-  background-color: #3b82f6;
+  background-color: #2563eb;
   color: #ffffff;
   cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 
   &:hover {
-    background-color: ${({ disabled }) => (disabled ? "#3b82f6" : "#2563eb")};
+    background-color: ${({ disabled }) => (disabled ? "#2563eb" : "#1d4ed8")};
   }
+`;
+
+// error message box
+const ErrorBox = styled.div`
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.8rem;
 `;
 
 /**
@@ -234,7 +247,7 @@ export default function CreateTaskModal({
         description: values.description?.trim() || undefined,
         dueDate: values.dueDate || undefined,
         priority: values.priority,
-        taskListId,
+        taskListId: taskListId || "",
       });
 
       // reset + close
@@ -243,6 +256,7 @@ export default function CreateTaskModal({
         description: "",
         dueDate: "",
         priority: Priority.MEDIUM,
+        taskListId: "",
       });
 
       onClose();
@@ -311,7 +325,7 @@ export default function CreateTaskModal({
               {error}
             </p>
           )}
-          
+
           <Footer>
             <SecondaryButton type="button" onClick={onClose} disabled={submitting}>
               Cancel
