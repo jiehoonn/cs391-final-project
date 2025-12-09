@@ -3,8 +3,19 @@
 /**
  * Component: TaskCard
  * Author: Tung Pham
- * Responsibility: Display a single task with checkbox, priority badge, and due date.
+ *
+ * Responsibility:
+ * Render a single task with its title, description, due date, priority,
+ * and completion state. Provides UI for task-level actions including:
+ * - Mark complete/incomplete
+ * - Open edit modal
+ * - Delete task
+ *
+ * Additional Notes:
+ * - This component is purely presentational.
+ * - All actions are delegated upward through callback props.
  */
+
 
 import { format } from "date-fns";
 import styled, { css } from "styled-components";
@@ -25,42 +36,45 @@ const CardContainer = styled.div<{ $completed: boolean }>`
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  background-color: #ffffff;
-  padding: 0.75rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-  transition: box-shadow 0.15s ease, transform 0.1s ease;
 
-  ${({ $completed }) =>
-    $completed &&
-    css`
-      opacity: 0.6;
-    `}
+  /* NEW: Makes card clearly visible against #f8fafc dashboard */
+  background-color: ${({ $completed }) =>
+    $completed ? "#e6e6eb" : "#eef1f5"};
+
+  border: 1px solid #d7dce3;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+
+  color: #111827;
+  transition: 0.15s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
   }
 `;
 
+
+
 const CheckboxButton = styled.button<{ $checked: boolean }>`
-  margin-top: 0.25rem;
-  width: 20px;
-  height: 20px;
+  margin-top: 0.35rem;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
-  border: 1px solid ${({ $checked }) => ($checked ? "#2563eb" : "#d1d5db")};
-  background-color: ${({ $checked }) => ($checked ? "#2563eb" : "#ffffff")};
+  border: 1px solid ${({ $checked }) => ($checked ? "#1d4ed8" : "#d1d5db")};
+  background-color: ${({ $checked }) => ($checked ? "#1d4ed8" : "#ffffff")};
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease,
+    transform 0.12s ease;
 
-  span {
-    font-size: 0.75rem;
-    color: #ffffff;
-    font-weight: 700;
+  &:hover {
+    transform: scale(1.05);
+    border-color: #1d4ed8;
   }
 `;
 
@@ -79,15 +93,15 @@ const HeaderRow = styled.div`
 const Title = styled.h3`
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111827;
   margin: 0;
+  color: #111827;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 `;
 
 const Description = styled.p`
-  margin: 0.15rem 0 0;
+  margin: 0.2rem 0 0;
   font-size: 0.85rem;
   color: #4b5563;
   display: -webkit-box;
@@ -99,25 +113,27 @@ const Description = styled.p`
 const PriorityBadge = styled.span<{ $priority: Priority }>`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   border-radius: 999px;
   border-width: 1px;
   border-style: solid;
-  padding: 0.15rem 0.5rem;
+  padding: 0.15rem 0.7rem;
   font-size: 0.7rem;
   font-weight: 600;
+  line-height: 1;
 
   ${({ $priority }) => {
     switch ($priority) {
       case Priority.HIGH:
         return css`
           background-color: #fee2e2;
-          color: #b91c1c;
+          color: #7f1d1d;
           border-color: #fecaca;
         `;
       case Priority.MEDIUM:
         return css`
           background-color: #fef3c7;
-          color: #92400e;
+          color: #78350f;
           border-color: #fde68a;
         `;
       case Priority.LOW:
@@ -129,59 +145,87 @@ const PriorityBadge = styled.span<{ $priority: Priority }>`
       case Priority.URGENT:
       default:
         return css`
-          background-color: #fef2ff;
-          color: #86198f;
-          border-color: #f5d0fe;
+          background-color: #f5d0fe;
+          color: #701a75;
+          border-color: #f9a8d4;
         `;
     }
   }}
 `;
 
 const FooterRow = styled.div`
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: #6b7280;
 `;
 
 const FooterLeft = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
+  flex-wrap: wrap;
 `;
 
 const FooterRight = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
 `;
 
 const StatusPill = styled.span`
   border-radius: 999px;
-  background-color: #dcfce7;
-  padding: 0.05rem 0.5rem;
+  background-color: #22c55e;
+  padding: 0.12rem 0.7rem;
   font-size: 0.7rem;
-  color: #15803d;
+  color: #022c22;
+  font-weight: 500;
 `;
 
-const LinkButton = styled.button`
+// const LinkButton = styled.button`
+//   background: none;
+//   border: none;
+//   padding: 0.2rem 0.35rem;
+//   font-size: 0.75rem;
+//   color: #ef4444; /* default for Delete; Edit overrides via style prop */
+//   cursor: pointer;
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 0.28rem;
+//   border-radius: 0.3rem;
+//   transition: background-color 0.12s ease, transform 0.12s ease;
+//
+//   &:hover {
+//     background-color: rgba(248, 113, 113, 0.12);
+//     transform: translateY(-1px);
+//   }
+// `;
+
+const IconButton = styled.button<{ $variant?: "edit" | "delete" }>`
   background: none;
   border: none;
-  padding: 0.2rem;
-  font-size: 0.75rem;
-  color: #2563eb;
+  padding: 0.35rem;
+  border-radius: 0.4rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  border-radius: 0.25rem;
+  justify-content: center;
+  transition: background-color 0.12s ease, transform 0.12s ease;
+
+  color: ${({ $variant }) =>
+    $variant === "edit" ? "#2563eb" : "#dc2626"};
 
   &:hover {
-    background-color: rgba(37, 99, 235, 0.1);
+    background-color: ${({ $variant }) =>
+      $variant === "edit"
+        ? "rgba(37, 99, 235, 0.10)"
+        : "rgba(220, 38, 38, 0.10)"};
+    transform: translateY(-1px);
   }
 `;
+
+
 
 // ===== component =====
 
@@ -191,23 +235,21 @@ export default function TaskCard({
   onEdit,
   onDelete,
 }: TaskCardProps) {
-  // Normalize dueDate from server to a Date
   const dueDate = task.dueDate ? new Date(task.dueDate) : null;
   const isOverdue =
     !!dueDate && !task.completed && dueDate.getTime() < Date.now();
 
-  // Convert ObjectId to string for keys & callbacks
   const id = task._id ? task._id.toString() : "";
 
   return (
     <CardContainer $completed={task.completed}>
-      {/* Checkbox triggers parent callback to toggle completion */}
       <CheckboxButton
         type="button"
         $checked={task.completed}
         onClick={() => onToggleComplete?.(id)}
+        aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
       >
-        {task.completed && <Check size={14} strokeWidth={3} />}
+        {task.completed && <Check size={14} strokeWidth={3} color="#ffffff" />}
       </CheckboxButton>
 
       <Content>
@@ -225,7 +267,11 @@ export default function TaskCard({
         <FooterRow>
           <FooterLeft>
             {dueDate && (
-              <span style={{ color: isOverdue ? "#b91c1c" : "#6b7280" }}>
+              <span
+                style={{
+                  color: isOverdue ? "#b91c1c" : "#4b5563",
+                }}
+              >
                 Due {format(dueDate, "MMM d, yyyy")}
                 {isOverdue && " • Overdue"}
               </span>
@@ -234,18 +280,27 @@ export default function TaskCard({
           </FooterLeft>
 
           <FooterRight>
-            {onEdit && (
-              <LinkButton type="button" onClick={() => onEdit(task)}>
-                <Pencil size={14} />
-                <span>Edit</span>
-              </LinkButton>
-            )}
-            {onDelete && (
-              <LinkButton type="button" onClick={() => onDelete(id)} style={{ color: "#dc2626" }}>
-                <Trash2 size={14} />
-                <span>Delete</span>
-              </LinkButton>
-            )}
+              {onEdit && (
+                <IconButton
+                  type="button"
+                  $variant="edit"
+                  onClick={() => onEdit(task)}
+                  aria-label="Edit task"
+                >
+                  <Pencil size={16} strokeWidth={2} />
+                </IconButton>
+              )}
+
+              {onDelete && (
+                <IconButton
+                  type="button"
+                  $variant="delete"
+                  onClick={() => onDelete(id)}
+                  aria-label="Delete task"
+                >
+                  <Trash2 size={16} strokeWidth={2} />
+                </IconButton>
+              )}
           </FooterRight>
         </FooterRow>
       </Content>

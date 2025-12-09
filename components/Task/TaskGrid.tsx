@@ -3,10 +3,19 @@
 /**
  * Component: TaskGrid
  * Author: Tung Pham
- * Responsibility: Fetch and display tasks in a responsive grid with filters,
- * and provide a button to create new tasks. If no task list exists yet,
- * it will automatically create a default list when the first task is added.
+ *
+ * Responsibility:
+ * Fetch and display tasks in a responsive grid layout with filtering options.
+ * Manages task creation, editing, deletion, and completion toggling.
+ * If no task list exists when creating the first task, it automatically
+ * creates a default list and assigns the task to it.
+ *
+ * Additional Notes:
+ * - Integrates CreateTaskModal and EditTaskModal.
+ * - Delegates all data mutations to the useTasks() hook.
+ * - UI-focused; contains no direct API calls except for list creation.
  */
+
 
 import { useState } from "react";
 import styled from "styled-components";
@@ -14,15 +23,40 @@ import { Plus } from "lucide-react";
 import TaskCard from "./TaskCard";
 import TaskFilters, { TaskFilter } from "./TaskFilters";
 import CreateTaskModal, { CreateTaskFormValues } from "./CreateTaskModal";
+import EditTaskModal from "./EditTaskModal";
 import { useTasks } from "@/lib/hooks/useTasks";
 import { apiPost } from "@/lib/api";
 import type { Task, TaskList } from "@/types/database";
+
+const Panel = styled.section`
+  margin-top: 1rem;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+
+  box-shadow: 0 0 28px rgba(0, 0, 0, 0.12);
+
+  padding: 0.75rem;
+`;
+
+
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  // background: #f8fafc; /* light slate gray */
+  // // border-radius: 1rem;
+
+  /* soft inner shadow for a “lifted” effect */
+  box-shadow:
+    inset 0 1px 1px rgba(0,0,0,0.03),
+    inset 0 -1px 1px rgba(0,0,0,0.02);
+
+  padding: 1.25rem;
 `;
+
 
 const TopBar = styled.div`
   display: flex;
@@ -98,6 +132,8 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
   const [filter, setFilter] = useState<TaskFilter>("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+
   // Use the taskListId directly - undefined means "all tasks"
   const effectiveTaskListId = taskListId || undefined;
 
@@ -131,54 +167,55 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
   });
 
   const handleCreateTask = async (values: CreateTaskFormValues) => {
-      // Use the currently selected task list ID
-      // If no list is selected (viewing "All Tasks"), create a default list first
-      let listId = effectiveTaskListId;
+    // Use the currently selected task list ID
+    // If no list is selected (viewing "All Tasks"), create a default list first
+    let listId = effectiveTaskListId;
 
-      if (!listId) {
-        // No task list selected - create a default one
-        const response = await apiPost<{ taskList: TaskList }>("/api/task-lists", {
-          name: "My Assignments",
-        });
+    if (!listId) {
+      // No task list selected - create a default one
+      const response = await apiPost<{ taskList: TaskList }>("/api/task-lists", {
+        name: "My Assignments",
+      });
 
-        console.log("🔍 API returned:", response);
+      console.log("🔍 API returned:", response);
 
-        const created = response.taskList;
+      const created = response.taskList;
 
-        if (!created || !created._id) {
-          console.error("POST /api/task-lists did not return _id:", response);
-          throw new Error("Failed to create default task list");
-        }
-
-        listId = created._id.toString();
-        console.log("Created default task list with ID:", listId);
+      if (!created || !created._id) {
+        console.error("POST /api/task-lists did not return _id:", response);
+        throw new Error("Failed to create default task list");
       }
 
-      console.log("Creating task with taskListId =", listId);
+      listId = created._id.toString();
+      console.log("Created default task list with ID:", listId);
+    }
 
-      // Build payload INCLUDING taskListId
-      const payload: any = {
-        title: values.title,
-        taskListId: listId,
-      };
+    console.log("Creating task with taskListId =", listId);
 
-      if (values.description) {
-        payload.description = values.description;
-      }
-      if (values.dueDate) {
-        // Create date at local midnight, not UTC midnight
-        // values.dueDate is "YYYY-MM-DD" format from input[type="date"]
-        const [year, month, day] = values.dueDate.split('-').map(Number);
-        const localDate = new Date(year, month - 1, day); // month is 0-indexed
-        payload.dueDate = localDate.toISOString();
-      }
-      if (values.priority) {
-        payload.priority = values.priority;
-      }
+    // Build payload INCLUDING taskListId
+    const payload: any = {
+      title: values.title,
+      taskListId: listId,
+    };
 
-      console.log("Creating task with payload:", payload);
-      await addTask(payload);
+    if (values.description) {
+      payload.description = values.description;
+    }
+    if (values.dueDate) {
+      // Create date at local midnight, not UTC midnight
+      // values.dueDate is "YYYY-MM-DD" format from input[type="date"]
+      const [year, month, day] = values.dueDate.split("-").map(Number);
+      const localDate = new Date(year, month - 1, day); // month is 0-indexed
+      payload.dueDate = localDate.toISOString();
+    }
+    if (values.priority) {
+      payload.priority = values.priority;
+    }
+
+    console.log("Creating task with payload:", payload);
+    await addTask(payload);
   };
+
   // ---------- rendering ----------
 
   if (loading) {
@@ -194,49 +231,66 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
   }
 
   return (
-    <Wrapper>
-      <TopBar>
-        <TaskFilters value={filter} onChange={setFilter} />
+    <Panel>
+      <Wrapper>
+        <TopBar>
+          <TaskFilters value={filter} onChange={setFilter} />
 
-        <RightSide>
-          <CountText>
-            {filteredTasks.length} task{filteredTasks.length !== 1 && "s"}
-          </CountText>
-          <NewTaskButton type="button" onClick={() => setIsCreateOpen(true)}>
-            <Plus size={16} />
-            <span>New Task</span>
-          </NewTaskButton>
-        </RightSide>
-      </TopBar>
+          <RightSide>
+            <CountText>
+              {filteredTasks.length} task{filteredTasks.length !== 1 && "s"}
+            </CountText>
+            <NewTaskButton type="button" onClick={() => setIsCreateOpen(true)}>
+              <Plus size={16} />
+              <span>New Task</span>
+            </NewTaskButton>
+          </RightSide>
+        </TopBar>
 
-      {filteredTasks.length === 0 ? (
-        <EmptyState>
-          No tasks for this view yet. Try creating a new task.
-        </EmptyState>
-      ) : (
-        <Grid>
-          {filteredTasks.map((task: Task, index: number) => {
-            const id = task._id ? task._id.toString() : `task-${index}`;
-            return (
-              <TaskCard
-                key={id}
-                task={task}
-                onToggleComplete={(taskId) =>
-                  updateTask(taskId, { completed: !task.completed })
-                }
-                onDelete={(taskId) => deleteTask(taskId)}
-              />
-            );
-          })}
-        </Grid>
-      )}
+        {filteredTasks.length === 0 ? (
+          <EmptyState>
+            No tasks for this view yet. Try creating a new task.
+          </EmptyState>
+        ) : (
+          <Grid>
+            {filteredTasks.map((task: Task, index: number) => {
+              const id = task._id ? task._id.toString() : `task-${index}`;
+              return (
+                <TaskCard
+                  key={id}
+                  task={task}
+                  onToggleComplete={(taskId) =>
+                    updateTask(taskId, { completed: !task.completed })
+                  }
+                  onEdit={(taskToEdit) => setEditingTask(taskToEdit)}
+                  onDelete={(taskId) => deleteTask(taskId)}
+                />
+              );
+            })}
+          </Grid>
+        )}
 
-      <CreateTaskModal
-        isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onCreate={handleCreateTask}
-      />
-    </Wrapper>
+        <CreateTaskModal
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+          onCreate={handleCreateTask}
+        />
+
+        {/* Edit existing task */}
+        {editingTask && (
+          <EditTaskModal
+            isOpen={true}
+            task={editingTask}
+            onClose={() => setEditingTask(null)}
+            // If your EditTaskModal needs a callback to persist changes:
+            onUpdate={async (taskId, values) => {
+              // forward to useTasks hook
+              await updateTask(taskId, values);
+            }}
+          />
+        )}
+      </Wrapper>
+    </Panel>
   );
 }
 

@@ -44,6 +44,7 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Page header */}
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-gray-900">
           Welcome, {session.user.name}!
@@ -53,15 +54,26 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">
+      {/* Task dashboard panel */}
+      <section
+        className="
+          rounded-3xl
+          border border-slate-200
+          bg-gradient-to-b from-white to-slate-50
+          shadow-[0_18px_40px_rgba(15,23,42,0.10),0_4px_10px_rgba(15,23,42,0.06)]
+          p-6 sm:p-7
+        "
+      >
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">
           {selectedTaskListId ? "Task List" : "All Tasks"}
         </h2>
+
         <TaskGrid
           key={selectedTaskListId || "all-tasks"}
           taskListId={selectedTaskListId || null}
         />
-      </div>
+      </section>
     </div>
   );
 }
+

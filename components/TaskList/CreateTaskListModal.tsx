@@ -47,9 +47,9 @@ export default function CreateTaskListModal ({
 
     return (
         <div
-            className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center"
+            className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-[1000]"
         >
-            <div className="w-80 bg-stone-100 text-stone-500 text-sm font-semibold p-4 rounded">
+            <div className="w-80 bg-stone-100 text-stone-500 text-sm font-semibold p-4 rounded relative z-[1010]">
                 <h2 className="mb-2 text-stone-900">Create New Task List</h2>
 
                 {/* Form for creating new task list */}

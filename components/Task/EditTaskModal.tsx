@@ -3,14 +3,25 @@
 /**
  * Component: EditTaskModal
  * Author: Tung Pham
- * Responsibility: Modal dialog to edit an existing task.
+ *
+ * Responsibility:
+ * Provide a modal interface for editing an existing task’s fields.
+ * Pre-fills the form with the selected task's current values and
+ * calls onUpdate() when the user saves changes.
+ *
+ * Additional Notes:
+ * - Converts local date input to ISO format before updating.
+ * - Resets form state automatically when a new task is selected.
  */
+
 
 import { FormEvent, useEffect, useState } from "react";
 import styled from "styled-components";
 import type { Task } from "@/types/database";
 
-
+/* =====================
+   Modal Layout Styling
+   ===================== */
 const Overlay = styled.div`
   position: fixed;
   inset: 0;
@@ -34,6 +45,7 @@ const Heading = styled.h2`
   font-size: 1.05rem;
   font-weight: 600;
   margin: 0 0 0.5rem;
+  color: #1f2937;
 `;
 
 const ErrorBox = styled.div`
@@ -45,6 +57,9 @@ const ErrorBox = styled.div`
   font-size: 0.8rem;
 `;
 
+/* =====================
+   Form + Input Styling
+   ===================== */
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -54,7 +69,7 @@ const Form = styled.form`
 const Label = styled.label`
   font-size: 0.8rem;
   font-weight: 500;
-  color: #374151;
+  color: #1f2937;
   display: block;
 `;
 
@@ -66,6 +81,11 @@ const Input = styled.input`
   padding: 0.45rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
+  color: #1f2937;
+
+  &::placeholder {
+      color: #6b7280;
+  }
 
   &:focus {
     border-color: #2563eb;
@@ -81,8 +101,13 @@ const TextArea = styled.textarea`
   padding: 0.45rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
+  color: #1f2937;
   resize: vertical;
   min-height: 70px;
+
+  &::placeholder {
+      color: #6b7280;
+  }
 
   &:focus {
     border-color: #2563eb;
@@ -98,6 +123,7 @@ const Select = styled.select`
   padding: 0.45rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
+  color: #12f937;
 
   &:focus {
     border-color: #2563eb;
@@ -105,6 +131,9 @@ const Select = styled.select`
   }
 `;
 
+/* ===============
+   Layout Helpers
+   =============== */
 const Row = styled.div`
   display: flex;
   gap: 0.75rem;
@@ -121,17 +150,20 @@ const Footer = styled.div`
   gap: 0.5rem;
 `;
 
-const SecondaryButton = styled.button`
+/* =====================
+   Button Styling
+   ===================== */
+const SecondaryButton = styled.button<{ disabled?: boolean }>`
   border-radius: 0.45rem;
   border: none;
   padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
   background-color: transparent;
   color: #4b5563;
-  cursor: pointer;
+  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
 
   &:hover {
-    background-color: #f3f4f6;
+    background-color: ${({ disabled }) => (disabled ? "transparent" : "#f3f4f6")};
   }
 `;
 
@@ -159,28 +191,19 @@ type EditTaskFormValues = {
   title: string;
   description: string;
   priority: Task["priority"];
-  dueDate: string;
+  dueDate: string; // stored as "YYYY-MM-DD" in form state
 };
 
 type EditTaskModalProps = {
   isOpen: boolean;
   onClose: () => void;
   task: Task | null;
-  onUpdate: (taskId: string, values: Partial<EditTaskFormValues>) => Promise<void> | void;
+  onUpdate: (
+    taskId: string,
+    values: Partial<EditTaskFormValues>
+  ) => Promise<void> | void;
 };
 
-/**
- * EditTaskModal Component
- * 
- * Displays a modal form for editing an existing task's properties including
- * title, description, priority, and due date. Pre-populates the form with
- * the current task values and handles form submission with error handling.
- * 
- * The form automatically resets when:
- * - A different task is selected
- * - The modal is opened
- * - Submission is successful
- */
 export default function EditTaskModal({
   isOpen,
   onClose,
@@ -197,18 +220,16 @@ export default function EditTaskModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Whenever we open the modal for a specific task, seed the form with its current values
+  // Seed the form whenever a task is opened in the modal
   useEffect(() => {
     if (task && isOpen) {
-      // Format dueDate for input[type="date"] which expects "YYYY-MM-DD"
       let formattedDueDate = "";
       if (task.dueDate) {
         const date = new Date(task.dueDate);
-        // Get local date components to avoid timezone issues
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        formattedDueDate = `${year}-${month}-${day}`;
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        formattedDueDate = `${year}-${month}-${day}`; // for <input type="date" />
       }
 
       setForm({
@@ -221,32 +242,50 @@ export default function EditTaskModal({
       setError(null);
     }
   }, [task, isOpen]);
-
+    
+  // hide modal if not open or no task selected
   if (!isOpen || !task) return null;
-  
-  /**
-   * Handles form submission
-   * - Prevents default form behavior
-   * - Calls onUpdate callback with taskId and form values
-   * - Closes modal on success
-   * - Displays error message on failure
-   */
+    
+  /* 
+    Handle form submit:
+    - Builds update payload
+    - Converts date to ISO format
+    - Calls parent onUpdate()
+  */  
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!task._id) {
+      setError("Missing task ID");
+      return;
+    }
 
     try {
       setIsSubmitting(true);
       setError(null);
 
-      // Delegate the actual PUT logic to parent
-      await onUpdate(task.id, form);
-      
-      // close modal 
+      // Build update payload
+      const updatePayload: Partial<EditTaskFormValues> = {
+        title: form.title,
+        description: form.description,
+        priority: form.priority,
+      };
+
+      // Convert local YYYY-MM-DD → ISO string, consistent with CreateTaskModal
+      if (form.dueDate) {
+        const [year, month, day] = form.dueDate.split("-").map(Number);
+        const localDate = new Date(year, month - 1, day);
+        updatePayload.dueDate = localDate.toISOString();
+      } else {
+        updatePayload.dueDate = "";
+      }
+
+      await onUpdate(task._id.toString(), updatePayload);
+
       onClose();
     } catch (err: any) {
       setError(err?.message ?? "Failed to update task");
     } finally {
-      // reset
       setIsSubmitting(false);
     }
   };

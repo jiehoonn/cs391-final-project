@@ -1,10 +1,19 @@
 "use client";
 
-/*
+/**
  * Component: CreateTaskModal
  * Author: Tung Pham
- * Responsibility: Modal dialog to create a new task in the selected task list.
+ *
+ * Responsibility:
+ * Display a modal dialog that allows users to create a new task.
+ * Handles form input for title, description, priority, and due date,
+ * and passes validated task data to the parent component via onCreate().
+ *
+ * Additional Notes:
+ * - This component does not write to the database directly.
+ * - All state updates and API calls are handled by the parent.
  */
+
 
 "use client";
 
@@ -303,7 +312,6 @@ export default function CreateTaskModal({
             </p>
           )}
           
-          // action buttons
           <Footer>
             <SecondaryButton type="button" onClick={onClose} disabled={submitting}>
               Cancel

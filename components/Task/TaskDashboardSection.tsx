@@ -3,8 +3,17 @@
 /**
  * Component: TaskDashboardSection
  * Author: Tung Pham
- * Responsibility: Show the user's tasks on the dashboard using useTasks + TaskCard.
+ *
+ * Responsibility:
+ * Display a full dashboard section for task management, including
+ * the task list selector, task grid, filters, and actions.
+ * Serves as the primary container for task-related UI.
+ *
+ * Additional Notes:
+ * - Handles which task list is currently active.
+ * - Coordinates layout between filters, grid, and modals.
  */
+
 
 import styled from "styled-components";
 import { useTasks } from "@/lib/hooks/useTasks";

@@ -1,5 +1,19 @@
 "use client";
 
+/**
+ * Component: TaskFilters
+ * Author: Tung Pham
+ *
+ * Responsibility:
+ * Provide a compact set of filters (All / Upcoming / Overdue)
+ * used to refine which tasks appear in the task grid.
+ *
+ * Additional Notes:
+ * - Implements controlled component behavior.
+ * - Does not modify tasks directly; only communicates filter changes.
+ */
+
+
 import styled from "styled-components";
 
 export type TaskFilter = "all" | "upcoming" | "overdue";
