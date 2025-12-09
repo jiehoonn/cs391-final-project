@@ -119,12 +119,7 @@ export default function TaskListSidebar({ selectedTaskListId, onSelectTaskList }
                     onClose={() => setIsModalOpen(false)} // close modal
                     onCreate={(newList) => {
                         // add new list to state
-                        console.log("TaskListSidebar - adding new list to state:", newList);
-                        setTaskLists((prev) => {
-                            const updated = [...prev, newList];
-                            console.log("TaskListSidebar - updated lists:", updated);
-                            return updated;
-                        });
+                        setTaskLists((prev) => [...prev, newList]);
                         setIsModalOpen(false); // close modal after creating
                     }}
                 />

@@ -261,7 +261,6 @@ export default function CreateTaskModal({
 
       onClose();
     } catch (err: any) {
-      console.error(err);
       setError(err?.message || "Failed to create task.");
     } finally {
       setSubmitting(false);

@@ -38,9 +38,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const taskListId = searchParams.get("taskListId");
 
-    console.log("GET /api/tasks - taskListId param:", taskListId);
-    console.log("GET /api/tasks - full URL:", request.url);
-
     let tasks;
 
     // If taskListId is provided, fetch tasks for that list
@@ -51,22 +48,10 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         );
       }
-      console.log("Fetching tasks for taskListId:", taskListId);
       tasks = await getTasksByTaskListId(new ObjectId(taskListId));
-      console.log(`Found ${tasks.length} tasks for taskListId:`, taskListId);
     } else {
       // Otherwise, fetch all tasks for the user
-      console.log("Fetching all tasks for user:", user._id);
       tasks = await getTasksByUserId(user._id);
-      console.log(`Found ${tasks.length} total tasks for user`);
-    }
-
-    // Log taskListIds of returned tasks for debugging
-    if (tasks.length > 0) {
-      console.log("Task taskListIds:", tasks.map(t => ({
-        title: t.title,
-        taskListId: t.taskListId?.toString()
-      })));
     }
 
     return NextResponse.json({ tasks }, { status: 200 });
@@ -109,9 +94,6 @@ export async function POST(request: NextRequest) {
     // Parse request body
     const body = await request.json();
 
-    console.log("🔍 API RECEIVED BODY:", JSON.stringify(body, null, 2));
-    console.log("🔍 Body keys:", Object.keys(body));
-
     const {
       taskListId,
       title,
@@ -147,7 +129,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the task
-    console.log("Creating task with taskListId:", taskListId);
     const task = await createTask({
       taskListId: new ObjectId(taskListId),
       userId: user._id,
@@ -159,8 +140,6 @@ export async function POST(request: NextRequest) {
       color,
       order,
     });
-
-    console.log("Task created with _id:", task._id, "and taskListId:", task.taskListId?.toString());
 
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {

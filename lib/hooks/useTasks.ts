@@ -12,20 +12,13 @@ type TasksResponse = {
 const fetcher = (url: string) => apiGet<TasksResponse>(url);
 
 export function useTasks(listId?: string) {
-  // FIX: Close the template string properly
   const url = `/api/tasks${listId ? `?taskListId=${listId}` : ""}`;
-
-  console.log("useTasks hook - listId:", listId, "url:", url);
 
   const { data, error, isLoading, mutate } = useSWR<TasksResponse>(url, fetcher);
   const tasks: Task[] = data?.tasks || [];
 
-  console.log("useTasks hook - fetched tasks:", tasks.length, "for url:", url);
-
   async function addTask(task: any) {
-    console.log("🔍 useTasks.addTask - received:", JSON.stringify(task, null, 2));
     const result = await apiPost<{ task: Task }>("/api/tasks", task);
-    console.log("🔍 useTasks.addTask - API returned:", result);
     const newTask = result.task || result;
     mutate({ tasks: [...tasks, newTask] }, false);
   }

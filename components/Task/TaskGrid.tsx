@@ -137,12 +137,6 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
   // Use the taskListId directly - undefined means "all tasks"
   const effectiveTaskListId = taskListId || undefined;
 
-  // Debug logging
-  console.log("TaskGrid render:", {
-    taskListIdProp: taskListId,
-    effectiveTaskListId,
-  });
-
   const {
     tasks,
     loading,
@@ -177,20 +171,14 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
         name: "My Assignments",
       });
 
-      console.log("🔍 API returned:", response);
-
       const created = response.taskList;
 
       if (!created || !created._id) {
-        console.error("POST /api/task-lists did not return _id:", response);
         throw new Error("Failed to create default task list");
       }
 
       listId = created._id.toString();
-      console.log("Created default task list with ID:", listId);
     }
-
-    console.log("Creating task with taskListId =", listId);
 
     // Build payload INCLUDING taskListId
     const payload: any = {
@@ -212,7 +200,6 @@ export default function TaskGrid({ taskListId }: TaskGridProps) {
       payload.priority = values.priority;
     }
 
-    console.log("Creating task with payload:", payload);
     await addTask(payload);
   };
 

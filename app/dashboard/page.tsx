@@ -91,7 +91,7 @@ export default function DashboardPage() {
         "
       >
         <h2 className="text-xl font-semibold text-slate-900 mb-4">
-          {selectedTaskListId ? "Task List" : "All Tasks"}
+          {taskListTitle}
         </h2>
 
         <TaskGrid
